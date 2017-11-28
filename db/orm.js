@@ -8,23 +8,28 @@ const mongo = require('./mongo.js');
 const Sequelize = require('sequelize');
 
 
-let db = new Sequelize('kuyikSQL',
-  process.env.SQL_USERNAME,
-  process.env.SQL_PASSWORD,
-  {
-    host: process.env.SQL_HOST,
-    dialect: 'mysql'
-  }
-);
 
-// check if the connection is working
-db.authenticate()
-  .then(() => {
-    console.log('Sequelize is connected to the kuyikSQL database');
-  })
-  .catch(err => {
-    console.error('Unable to connect to the database:', err);
-  });
+let db = new Sequelize(process.env.CLEARDB_DATABASE_URL, {});
+
+// let db = new Sequelize('kuyikSQL',
+//   process.env.SQL_USERNAME,
+//   process.env.SQL_PASSWORD,
+//   {
+//     host: process.env.SQL_HOST,
+//     dialect: 'mysql'
+//   }
+// );
+
+const init = () => {
+  // check if the connection is working
+  return db.authenticate()
+    .then(() => {
+      console.log('Sequelize is connected to the kuyikSQL database');
+    })
+    .catch(err => {
+      console.error('Unable to connect to the database:', err);
+    });
+};
 
 
 // define our tables (foreign keys come later)
@@ -201,6 +206,7 @@ const saveGoogleUser = function(googleProfile) {
 };
 
 module.exports.db = db;
+module.exports.init = init;
 module.exports.Posts = Posts;
 module.exports.Locations = Locations;
 module.exports.Users = Users;

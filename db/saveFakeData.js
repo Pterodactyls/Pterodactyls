@@ -12,11 +12,13 @@ var mongo = require('./mongo.js');
 
 let mongoIds = [];
 
-// create the database and tables
-orm.db.sync({force: true})
+mongo.init()
+  .then(() => orm.init())
+  .then(() => orm.db.sync({force: true}))
+  // create the database and tables
   .then(() => orm.Users.sync())
   .then(() => orm.Locations.sync())
-  .then(() => orm.Sessions.sync())
+  // .then(() => orm.Sessions.sync())
   .then(() => orm.Posts.sync())
   .then(() => {
     return mongo.Post.remove({}).exec();
@@ -55,6 +57,7 @@ function saveSQLUsers() {
   var users = [];
   for (var i = 0; i < 15; i++) {
     let userEntry = {
+      id: i + 1,
       username: faker.internet.userName(),
       email: faker.internet.email(),
       about_me: faker.lorem.paragraph(), // eslint-disable-line camelcase
@@ -63,7 +66,10 @@ function saveSQLUsers() {
     users.push(orm.Users.create(userEntry));
   }
   Promise.all(users)
-    .then(users => saveSQLLocations())
+    .then(users => {
+      console.log(JSON.stringify(users, null, 2));
+      return saveSQLLocations();
+    })
     .catch(err => console.log('Error saving locations: ', err));
 }
 
@@ -76,6 +82,7 @@ function saveSQLLocations() {
   var locations = [];
   for (var i = 0; i < 15; i++) {
     let locationEntry = {
+      id: i + 1,
       location: faker.address.city() + ', ' + faker.address.country()
     };
     locations.push(orm.Locations.create(locationEntry));
@@ -95,6 +102,7 @@ function saveSQLPosts() {
   for (var i = 0; i < 15; i++) {
     let mongoId = mongoIds[i];
     let postsEntry = {
+      id: i + 1,
       id_users: 1 + Math.floor(Math.random() * 15), // eslint-disable-line camelcase
       title: faker.lorem.words(6),
       subtitle: faker.lorem.sentence(),
